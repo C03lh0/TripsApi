@@ -40,13 +40,13 @@ namespace Journey.Application.UseCases.Trips.Register
             if (string.IsNullOrWhiteSpace(request.Name))
                 //Não é uma boa prática chumbar as mensagens de retorno diretamente aqui, pois se a mensagem no futuro for alterada, precisaremos catar ela em cada parte do código o que iria complicar a manutenção desse código.
                 //A ideia é colocar essas mensagens no projeto de Exception num arquivo .resw
-                throw new CRUDException($"{nameof(request.Name)}: {ResourceErrorMessages.NAME_EMPTY} empty.");
+                throw new ErrorOnValidationException($"{nameof(request.Name)}: {ResourceErrorMessages.NAME_EMPTY} empty.");
 
             if (request.StartDate.Date < DateTime.UtcNow.Date)
-                throw new CRUDException($"{ResourceErrorMessages.DATE_TRIP_MUST_BE_LATER_THAN_TODAY} later than today ({DateTime.UtcNow}).");
+                throw new ErrorOnValidationException($"{ResourceErrorMessages.DATE_TRIP_MUST_BE_LATER_THAN_TODAY} later than today ({DateTime.UtcNow}).");
 
             if (request.EndDate.Date < request.StartDate.Date)
-                throw new CRUDException($"{ResourceErrorMessages.END_DATE_TRIP_MUST_BE_LATER_START_DATE} later start date ({request.StartDate}).");
+                throw new ErrorOnValidationException($"{ResourceErrorMessages.END_DATE_TRIP_MUST_BE_LATER_START_DATE} later start date ({request.StartDate}).");
 
         }   
     }
