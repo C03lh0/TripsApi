@@ -9,8 +9,16 @@ namespace Journey.Exception.ExceptionsBase
 {
     public class ErrorOnValidationException : CRUDException
     {
-        public ErrorOnValidationException(string message) : base(message)
+        private readonly IList<string> _messageErrors;
+
+        public ErrorOnValidationException(IList<string> messageErrors) : base(string.Empty)
         {
+            _messageErrors = messageErrors;
+        }
+
+        public override IList<string> GetErrorMessages()
+        {
+            return _messageErrors;
         }
 
         public override HttpStatusCode GetStatusCode()

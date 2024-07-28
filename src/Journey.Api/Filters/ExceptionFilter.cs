@@ -1,4 +1,5 @@
-﻿using Journey.Exception.ExceptionsBase;
+﻿using Journey.Communication.Responses;
+using Journey.Exception.ExceptionsBase;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -11,12 +12,14 @@ namespace Journey.Api.Filters
             if (context.Exception is CRUDException crudException)
             {
                 context.HttpContext.Response.StatusCode = (int)crudException.GetStatusCode();
-                context.Result = new ObjectResult(context.Exception.Message);
+                var resposeJson = new ResponseErrosJson(crudException.GetErrorMessages());
+                context.Result = new ObjectResult(resposeJson);
             }
             else
             {
                 context.HttpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                context.Result = new ObjectResult("Erro desconhecido");
+                var resposeJson = new ResponseErrosJson(new List<string> { "Erro desconhecido "});
+                context.Result = new ObjectResult(resposeJson);
             }
         }
     }
