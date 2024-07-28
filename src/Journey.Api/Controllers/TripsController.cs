@@ -1,4 +1,7 @@
-﻿using Journey.Application.UseCases.Trips.Delete;
+﻿using Journey.Application.UseCases.Activities.Complete;
+using Journey.Application.UseCases.Activities.Delete;
+using Journey.Application.UseCases.Activities.Register;
+using Journey.Application.UseCases.Trips.Delete;
 using Journey.Application.UseCases.Trips.GetAll;
 using Journey.Application.UseCases.Trips.GetById;
 using Journey.Application.UseCases.Trips.Register;
@@ -17,7 +20,7 @@ namespace Journey.Api.Controllers
         //Para criação de recurso é utilizado o HttpPost
         [HttpPost]
         [ProducesResponseType(typeof(ResponseShortTripJson), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResponseErrosJson), StatusCodes.Status400BadRequest)]
         //[FromBody] - informa ao C# que ele vai ler as informações do corpo da requisição para montar o objeto.
         public IActionResult Register([FromBody] RequestRegisterTripJson request)
         {
@@ -25,6 +28,34 @@ namespace Journey.Api.Controllers
             //Chamar funções de caso de uso como Execute. "Executa pra mim essa US."
             var tripRegisterResponse = registerTripUseCase.Execute(request);
             return Created(string.Empty, tripRegisterResponse);
+        }
+
+        [HttpPost]
+        [Route("{tripId}/activity")]
+        [ProducesResponseType(typeof(ResponseActivityJson), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ResponseErrosJson), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResponseErrosJson), StatusCodes.Status404NotFound)]
+        //O nome da variável Id deve ser o mesmo tanto no parametro do "ROUTE" como no parametro do método.
+        public IActionResult RegisterActivity([FromRoute] Guid tripId, [FromBody] RequestRegisterActivityJson request)
+        {
+            var useCase = new RegisterActivityForTripUseCase();
+
+            var response = useCase.Execute(tripId, request);
+
+            return Created(string.Empty, response);
+        }
+
+        [HttpPut]
+        [Route("{tripId}/activity/{activityId}/complete")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ResponseErrosJson), StatusCodes.Status404NotFound)]
+        public IActionResult CompleteActivity([FromRoute] Guid tripId, [FromRoute] Guid activityId)
+        {
+            var useCase = new CompleteActivityForTripUseCase();
+
+            useCase.Execute(tripId, activityId);
+
+            return NoContent();
         }
 
         [HttpGet]
@@ -41,7 +72,7 @@ namespace Journey.Api.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(ResponseTripJson), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ResponseErrosJson), StatusCodes.Status404NotFound)]
         public IActionResult GetById([FromRoute] Guid id)
         {
             var useCase = new GetTripByIdUseCase();
@@ -54,12 +85,25 @@ namespace Journey.Api.Controllers
         [HttpDelete]
         [Route("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ResponseErrosJson), StatusCodes.Status404NotFound)]
         public IActionResult Delete([FromRoute] Guid id)
         {
             var useCase = new DeleteTripByIdUseCase();
 
             useCase.Execute(id);
+
+            return NoContent();
+        }
+
+        [HttpDelete]
+        [Route("{tripId}/activity/{activityId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ResponseErrosJson), StatusCodes.Status404NotFound)]
+        public IActionResult DeleteActivity([FromRoute] Guid tripId, [FromRoute] Guid activityId)
+        {
+            var useCase = new DeleteActivityForTripUseCase();
+
+            useCase.Execute(tripId, activityId);
 
             return NoContent();
         }
